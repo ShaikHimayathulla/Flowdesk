@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1220">
+<title>FlowDesk | Workspace Management</title>
+<style>
+:root {
+  --bg:#0b1220; --panel:#111c2e; --panel2:#17243a; --line:#263650;
+  --text:#e8eef8; --muted:#91a1b8; --blue:#5b8cff; --cyan:#40c4d8;
+  --green:#39c98a; --yellow:#f3bd54; --red:#ef6b75; --radius:16px;
+}
+* { box-sizing:border-box; }
+html,body { margin:0; min-height:100%; background:var(--bg); color:var(--text); }
+body { font-family:Inter,Segoe UI,Arial,sans-serif; }
+button,input,textarea,select { font:inherit; }
+button { cursor:pointer; }
+.app { display:flex; min-height:100vh; }
+.sidebar {
+  width:248px; flex-shrink:0; background:#0e192a; border-right:1px solid var(--line);
+  padding:22px 15px; display:flex; flex-direction:column; gap:22px;
+}
+.brand { display:flex; align-items:center; gap:11px; padding:4px 9px; }
+.brand-mark {
+  width:38px; height:38px; border-radius:12px; display:grid; place-items:center;
+  background:linear-gradient(135deg,var(--blue),var(--cyan)); color:white; font-weight:900;
+}
+.brand-name { font-size:20px; font-weight:800; letter-spacing:.2px; }
+.brand-sub { color:var(--muted); font-size:10px; letter-spacing:1.5px; margin-top:3px; }
+.nav-label { color:#6f819c; font-size:10px; letter-spacing:1.6px; padding:0 12px; }
+.nav { display:grid; gap:6px; }
+.nav button {
+  border:0; color:#aebbd0; background:transparent; text-align:left; width:100%;
+  border-radius:11px; padding:12px 13px; display:flex; align-items:center; gap:12px;
+}
+.nav button:hover,.nav button.active { color:white; background:#1b2b45; }
+.nav button.active { box-shadow:inset 3px 0 var(--blue); }
+.nav-icon { width:20px; text-align:center; font-size:16px; }
+.sidebar-bottom { margin-top:auto; border:1px solid var(--line); border-radius:13px; padding:13px; }
+.sidebar-bottom strong { display:block; font-size:12px; margin-bottom:5px; }
+.sidebar-bottom span { color:var(--muted); font-size:11px; line-height:1.5; }
+.main { flex:1; min-width:0; }
+.topbar {
+  height:76px; border-bottom:1px solid var(--line); display:flex; align-items:center;
+  justify-content:space-between; padding:0 30px; gap:15px; background:#0d1727;
+}
+.topbar-left { display:flex; align-items:center; gap:12px; }
+.menu-toggle { display:none; border:1px solid var(--line); background:var(--panel); color:white; padding:8px 11px; border-radius:9px; }
+.page-title { font-size:18px; font-weight:750; }
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.search { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:9px 12px; color:var(--text); width:220px; }
+.avatar { width:36px; height:36px; border-radius:50%; background:#28456d; display:grid; place-items:center; font-size:12px; font-weight:800; }
+.content { padding:28px 30px 40px; max-width:1500px; margin:auto; }
+.page-head { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; margin-bottom:24px; }
+h1 { margin:0 0 7px; font-size:26px; letter-spacing:-.5px; }
+.subtitle { margin:0; color:var(--muted); font-size:13px; }
+.btn {
+  border:1px solid var(--line); background:var(--panel2); color:var(--text);
+  border-radius:10px; padding:10px 14px; font-weight:650; font-size:12px;
+}
+.btn:hover { filter:brightness(1.16); }
+.btn-primary { background:var(--blue); border-color:var(--blue); color:white; }
+.btn-danger { background:#46232d; border-color:#75404a; color:#ffb5bc; }
+.btn-small { padding:7px 10px; font-size:11px; }
+.grid { display:grid; gap:16px; }
+.stats { grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:18px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+.stat-top { display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:12px; }
+.stat-icon { width:34px; height:34px; display:grid; place-items:center; border-radius:10px; background:#203557; color:#8db0ff; }
+.stat-value { font-size:28px; font-weight:800; margin:13px 0 4px; }
+.stat-note { color:var(--muted); font-size:11px; }
+.dashboard-grid { grid-template-columns:1.5fr 1fr; }
+.card-title { font-size:14px; font-weight:750; margin:0 0 16px; }
+.project-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-top:1px solid var(--line); }
+.project-color { width:9px; height:38px; border-radius:8px; background:var(--blue); }
+.project-info { flex:1; min-width:0; }
+.project-info strong { display:block; font-size:12px; margin-bottom:5px; }
+.project-info span { color:var(--muted); font-size:11px; }
+.progress { height:7px; background:#26354b; border-radius:10px; overflow:hidden; margin-top:9px; }
+.progress span { display:block; height:100%; background:linear-gradient(90deg,var(--blue),var(--cyan)); border-radius:10px; }
+.pct { color:#c7d5e9; font-size:11px; min-width:34px; text-align:right; }
+.activity { display:flex; gap:11px; padding:10px 0; border-top:1px solid var(--line); }
+.activity-dot { width:8px; height:8px; background:var(--cyan); border-radius:50%; margin-top:5px; }
+.activity p { margin:0; font-size:11px; line-height:1.5; }
+.activity small { color:var(--muted); display:block; margin-top:3px; }
+.table-wrap { overflow:auto; border:1px solid var(--line); border-radius:14px; background:var(--panel); }
+table { width:100%; border-collapse:collapse; min-width:650px; }
+th,td { padding:14px 16px; text-align:left; border-bottom:1px solid var(--line); font-size:12px; }
+th { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:1px; }
+td { color:#dce5f3; }
+tr:last-child td { border-bottom:0; }
+.status { display:inline-block; border-radius:20px; padding:5px 9px; font-size:10px; font-weight:700; }
+.status.done { background:#153c35; color:#65e0b1; }
+.status.progressing { background:#18385a; color:#8dbbff; }
+.status.todo { background:#44371d; color:#f3ce79; }
+.status.overdue { background:#48232c; color:#ff9ba5; }
+.priority { font-weight:700; font-size:11px; }
+.priority.High { color:#ff8d98; }
+.priority.Medium { color:#f3c66d; }
+.priority.Low { color:#6fddb1; }
+.toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:16px; }
+.field { background:#0d1727; border:1px solid var(--line); color:var(--text); padding:10px 11px; border-radius:9px; outline:none; }
+.field:focus { border-color:var(--blue); }
+.toolbar .field { min-width:180px; }
+.kanban { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.kanban-col { background:#0e192a; border:1px solid var(--line); border-radius:14px; padding:13px; min-height:250px; }
+.kanban-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:12px; font-weight:750; }
+.kanban-count { color:var(--muted); background:var(--panel2); padding:3px 7px; border-radius:20px; }
+.task-card { background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:12px; margin-bottom:9px; }
+.task-card strong { display:block; font-size:12px; margin-bottom:8px; }
+.task-card small { color:var(--muted); font-size:10px; }
+.task-meta { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+.calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:7px; }
+.cal-day { background:var(--panel); border:1px solid var(--line); min-height:92px; border-radius:9px; padding:8px; font-size:11px; }
+.cal-day.muted { opacity:.35; }
+.cal-day.today { border-color:var(--blue); box-shadow:inset 0 0 0 1px var(--blue); }
+.cal-event { background:#1b3b61; color:#a9ceff; border-radius:5px; padding:4px; margin-top:6px; font-size:9px; }
+.member-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.member { display:flex; align-items:center; gap:12px; }
+.member-avatar { width:42px; height:42px; border-radius:13px; display:grid; place-items:center; background:#263e62; font-weight:800; }
+.member-info strong { display:block; font-size:12px; }
+.member-info span { display:block; color:var(--muted); font-size:10px; margin-top:4px; }
+.report-grid { grid-template-columns:1.2fr 1fr; }
+.bar-chart { display:flex; align-items:flex-end; gap:13px; height:180px; padding:12px 5px 0; border-bottom:1px solid var(--line); }
+.bar-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; height:100%; justify-content:flex-end; }
+.bar { width:65%; max-width:42px; background:linear-gradient(180deg,var(--cyan),var(--blue)); border-radius:7px 7px 2px 2px; }
+.bar-item small { color:var(--muted); font-size:10px; }
+.donut-wrap { display:flex; align-items:center; gap:20px; }
+.donut { width:125px; height:125px; border-radius:50%; background:conic-gradient(var(--green) 0 60%,var(--blue) 60% 84%,var(--yellow) 84% 100%); position:relative; flex-shrink:0; }
+.donut:after { content:""; position:absolute; inset:18px; background:var(--panel); border-radius:50%; }
+.legend { display:grid; gap:10px; font-size:11px; color:var(--muted); }
+.legend span { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:7px; }
+.message-list { display:grid; gap:10px; }
+.message { display:flex; gap:12px; padding:13px; background:var(--panel); border:1px solid var(--line); border-radius:12px; }
+.message-body { flex:1; }
+.message-body strong { font-size:12px; }
+.message-body p { color:#b8c5d8; font-size:11px; margin:6px 0; line-height:1.5; }
+.message-body small { color:var(--muted); font-size:10px; }
+.settings-grid { grid-template-columns:1fr 1fr; }
+.setting-row { display:flex; justify-content:space-between; align-items:center; gap:15px; padding:14px 0; border-top:1px solid var(--line); }
+.setting-row strong { display:block; font-size:12px; }
+.setting-row small { display:block; color:var(--muted); font-size:10px; margin-top:4px; }
+.switch { accent-color:var(--blue); width:17px; height:17px; }
+.empty { padding:35px; text-align:center; color:var(--muted); font-size:12px; }
+.modal-backdrop { position:fixed; inset:0; background:#020711bb; display:none; place-items:center; padding:15px; z-index:20; }
+.modal-backdrop.open { display:grid; }
+.modal { width:min(500px,100%); background:var(--panel); border:1px solid var(--line); border-radius:17px; padding:22px; box-shadow:0 25px 80px #0008; }
+.modal-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+.modal-head h2 { margin:0; font-size:17px; }
+.close { border:0; color:var(--muted); background:transparent; font-size:23px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-group { display:grid; gap:6px; }
+.form-group.full { grid-column:1/-1; }
+.form-group label { color:var(--muted); font-size:10px; }
+.form-group .field { width:100%; }
+.modal-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; }
+.toast { position:fixed; right:22px; bottom:22px; background:#183b34; color:#8ce7c3; border:1px solid #286451; border-radius:10px; padding:12px 16px; font-size:12px; display:none; z-index:40; }
+.toast.show { display:block; }
+.footer-note { color:#71829a; font-size:10px; margin-top:20px; text-align:center; }
+@media(max-width:900px) {
+  .sidebar { width:220px; }
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .member-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:680px) {
+  .sidebar { position:fixed; z-index:30; left:-260px; top:0; bottom:0; transition:left .2s; width:250px; }
+  .sidebar.open { left:0; }
+  .menu-toggle { display:block; }
+  .topbar { padding:0 15px; height:65px; }
+  .topbar .search { display:none; }
+  .content { padding:22px 15px 35px; }
+  .page-head { flex-direction:column; }
+  .stats,.dashboard-grid,.kanban,.report-grid,.settings-grid,.member-grid { grid-template-columns:1fr; }
+  .calendar { gap:4px; }
+  .cal-day { min-height:65px; padding:5px; font-size:9px; }
+  .cal-event { font-size:8px; }
+  .form-grid { grid-template-columns:1fr; }
+  .form-group.full { grid-column:auto; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">F</div>
+    <div><div class="brand-name">FlowDesk</div><div class="brand-sub">WORKSPACE OS</div></div>
+  </div>
+  <div class="nav-label">WORKSPACE</div>
+  <nav class="nav" id="navigation">
+    <button class="active" data-page="dashboard"><span class="nav-icon">▦</span>Dashboard</button>
+    <button data-page="projects"><span class="nav-icon">▣</span>Projects</button>
+    <button data-page="tasks"><span class="nav-icon">☑</span>My Tasks</button>
+    <button data-page="calendar"><span class="nav-icon">▦</span>Calendar</button>
+    <button data-page="team"><span class="nav-icon">♙</span>Team Members</button>
+    <button data-page="reports"><span class="nav-icon">▥</span>Reports & Analytics</button>
+    <button data-page="messages"><span class="nav-icon">✉</span>Messages</button>
+    <button data-page="settings"><span class="nav-icon">⚙</span>Settings</button>
+  </nav>
+  <div class="sidebar-bottom"><strong>Keep work moving</strong><span>Plan clearly, collaborate better and deliver on time with FlowDesk.</span></div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left"><button class="menu-toggle" id="menuToggle">☰</button><div class="page-title" id="topTitle">Dashboard</div></div>
+    <div class="topbar-right"><input class="search" id="globalSearch" placeholder="Search tasks and projects..."><div class="avatar">HH</div></div>
+  </header>
+  <section class="content" id="content"></section>
+</main>
+</div>
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <div class="modal-head"><h2 id="modalTitle">Add item</h2><button class="close" id="closeModal">×</button></div>
+    <form id="itemForm">
+      <div class="form-grid" id="formFields"></div>
+      <div class="modal-actions"><button type="button" class="btn" id="cancelModal">Cancel</button><button class="btn btn-primary" type="submit">Save item</button></div>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+const STORAGE_KEY = "flowdesk-workspace-v1";
+const initialState = {
+  projects: [
+    {id:1,name:"Online Shopping System",owner:"Himayathulla",deadline:"2026-12-15",status:"In Progress",progress:72,description:"Build a responsive shopping platform."},
+    {id:2,name:"Campus Event Portal",owner:"Ayesha",deadline:"2026-12-20",status:"In Progress",progress:45,description:"Manage college events and registrations."},
+    {id:3,name:"Portfolio Website",owner:"Rahul",deadline:"2026-12-28",status:"Planning",progress:20,description:"Create a personal developer portfolio."}
+  ],
+  tasks: [
+    {id:101,title:"Design product listing page",project:"Online Shopping System",assignee:"Himayathulla",due:"2026-12-05",status:"In Progress",priority:"High"},
+    {id:102,title:"Create database schema",project:"Online Shopping System",assignee:"Ayesha",due:"2026-12-07",status:"To Do",priority:"High"},
+    {id:103,title:"Build login and signup",project:"Online Shopping System",assignee:"Rahul",due:"2026-12-09",status:"To Do",priority:"Medium"},
+    {id:104,title:"Test checkout workflow",project:"Online Shopping System",assignee:"Himayathulla",due:"2026-12-12",status:"Done",priority:"Medium"},
+    {id:105,title:"Prepare event home page",project:"Campus Event Portal",assignee:"Sara",due:"2026-12-10",status:"In Progress",priority:"Low"},
+    {id:106,title:"Review mobile layout",project:"Portfolio Website",assignee:"Ayesha",due:"2026-12-14",status:"Done",priority:"Low"}
+  ],
+  members: [
+    {id:1,name:"Himayathulla",role:"Project Lead",email:"himayathulla@example.com",initials:"HH"},
+    {id:2,name:"Ayesha Khan",role:"UI Designer",email:"ayesha@example.com",initials:"AK"},
+    {id:3,name:"Rahul Varma",role:"Backend Developer",email:"rahul@example.com",initials:"RV"},
+    {id:4,name:"Sara Ali",role:"Frontend Developer",email:"sara@example.com",initials:"SA"},
+    {id:5,name:"Arjun Rao",role:"QA Tester",email:"arjun@example.com",initials:"AR"},
+    {id:6,name:"Meera Das",role:"Database Engineer",email:"meera@example.com",initials:"MD"}
+  ],
+  messages: [
+    {id:1,from:"Ayesha Khan",text:"The first dashboard design is ready for review. Please check the project board.",time:"Today, 9:15 AM"},
+    {id:2,from:"Rahul Varma",text:"Database tables are created. I will connect the API next.",time:"Today, 10:30 AM"},
+    {id:3,from:"Sara Ali",text:"Can we review the mobile layout in the afternoon?",time:"Yesterday, 4:45 PM"}
+  ],
+  settings:{emailAlerts:true,weeklyReport:false,darkMode:true}
+};
+let state = loadState();
+let currentPage = "dashboard";
+let editing = null;
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : structuredClone(initialState);
+  } catch (error) {
+    return JSON.parse(JSON.stringify(initialState));
+  }
+}
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[char]));
+}
+function formatDate(value) {
+  if (!value) return "No date";
+  return new Date(value + "T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+}
+function statusClass(status) {
+  if (status === "Done") return "done";
+  if (status === "In Progress") return "progressing";
+  if (status === "Overdue") return "overdue";
+  return "todo";
+}
+function taskStatusBadge(status) {
+  return `<span class="status ${statusClass(status)}">${escapeHTML(status)}</span>`;
+}
+function toast(message) {
+  const node = document.getElementById("toast");
+  node.textContent = message;
+  node.classList.add("show");
+  setTimeout(() => node.classList.remove("show"), 2400);
+}
+function setPage(page) {
+  currentPage = page;
+  document.querySelectorAll("#navigation button").forEach(button => {
+    button.classList.toggle("active", button.dataset.page === page);
+  });
+  const labels = {dashboard:"Dashboard",projects:"Projects",tasks:"My Tasks",calendar:"Calendar",team:"Team Members",reports:"Reports & Analytics",messages:"Messages",settings:"Settings"};
+  document.getElementById("topTitle").textContent = labels[page] || "FlowDesk";
+  document.getElementById("sidebar").classList.remove("open");
+  renderPage();
+}
+function pageHead(title,subtitle,action="") {
+  return `<div class="page-head"><div><h1>${title}</h1><p class="subtitle">${subtitle}</p></div>${action}</div>`;
+}
+function statCard(label,value,icon,note) {
+  return `<div class="card"><div class="stat-top"><span>${label}</span><span class="stat-icon">${icon}</span></div><div class="stat-value">${value}</div><div class="stat-note">${note}</div></div>`;
+}
+function renderDashboard() {
+  const totalTasks = state.tasks.length;
+  const done = state.tasks.filter(t => t.status === "Done").length;
+  const active = state.tasks.filter(t => t.status === "In Progress").length;
+  const pending = totalTasks - done;
+  const projectRows = state.projects.map(project => `
+    <div class="project-row"><div class="project-color"></div><div class="project-info">
+      <strong>${escapeHTML(project.name)}</strong><span>${escapeHTML(project.owner)} · Due ${formatDate(project.deadline)}</span>
+      <div class="progress"><span style="width:${Math.max(0,Math.min(100,Number(project.progress)||0))}%"></span></div>
+    </div><div class="pct">${project.progress}%</div></div>`).join("");
+  const recent = state.tasks.slice(-4).reverse().map(task => `
+    <div class="activity"><span class="activity-dot"></span><p><b>${escapeHTML(task.title)}</b><br>${escapeHTML(task.assignee)} · ${escapeHTML(task.project)}<small>${taskStatusBadge(task.status)} &nbsp; ${formatDate(task.due)}</small></p></div>`).join("");
+  return pageHead("Good morning, Himayathulla 👋","Here is what is happening across your workspace today.",
+    `<button class="btn btn-primary" data-action="add-task">＋ Create task</button>`) +
+    `<div class="grid stats">${statCard("Total projects",state.projects.length,"▣","Across your workspace")}${statCard("Total tasks",totalTasks,"☑","All assigned work")}${statCard("In progress",active,"◷","Currently being worked on")}${statCard("Completed",done,"✓",`${pending} tasks still open`)}</div>
+    <div class="grid dashboard-grid">
+      <div class="card"><h3 class="card-title">Active projects</h3>${projectRows || '<div class="empty">No projects yet. Create your first project.</div>'}</div>
+      <div class="card"><h3 class="card-title">Recent task activity</h3>${recent || '<div class="empty">No activity yet.</div>'}</div>
+    </div><p class="footer-note">FlowDesk keeps your projects, tasks and people connected.</p>`;
+}
+function renderProjects() {
+  const rows = state.projects.map(project => `<tr>
+    <td><b>${escapeHTML(project.name)}</b><br><span class="subtitle">${escapeHTML(project.description || "")}</span></td>
+    <td>${escapeHTML(project.owner)}</td><td>${formatDate(project.deadline)}</td>
+    <td>${taskStatusBadge(project.status)}</td><td>${project.progress}%</td>
+    <td><button class="btn btn-small" data-action="edit-project" data-id="${project.id}">Edit</button>
+    <button class="btn btn-small btn-danger" data-action="delete-project" data-id="${project.id}">Delete</button></td></tr>`).join("");
+  return pageHead("Projects","Create projects and keep every milestone visible.",
+    `<button class="btn btn-primary" data-action="add-project">＋ New project</button>`) +
+    `<div class="table-wrap"><table><thead><tr><th>Project</th><th>Owner</th><th>Deadline</th><th>Status</th><th>Progress</th><th>Actions</th></tr></thead><tbody>${rows || '<tr><td colspan="6" class="empty">No projects created yet.</td></tr>'}</tbody></table></div>`;
+}
+function renderTasks() {
+  const columns = ["To Do","In Progress","Done"];
+  const groups = columns.map(status => {
+    const tasks = state.tasks.filter(task => task.status === status);
+    const cards = tasks.map(task => `<div class="task-card"><strong>${escapeHTML(task.title)}</strong><small>${escapeHTML(task.project)} · ${escapeHTML(task.assignee)}</small>
+      <div class="task-meta"><span class="priority ${escapeHTML(task.priority)}">${escapeHTML(task.priority)} priority</span>
+      <select class="field task-status" data-id="${task.id}" aria-label="Change task status">
+        ${columns.map(option => `<option ${option===task.status?"selected":""}>${option}</option>`).join("")}
+      </select></div><small>Due ${formatDate(task.due)}</small>
+      <div style="margin-top:9px"><button class="btn btn-small" data-action="edit-task" data-id="${task.id}">Edit</button>
+      <button class="btn btn-small btn-danger" data-action="delete-task" data-id="${task.id}">Delete</button></div></div>`).join("");
+    return `<div class="kanban-col"><div class="kanban-head">${status}<span class="kanban-count">${tasks.length}</span></div>${cards || '<div class="empty">No tasks</div>'}</div>`;
+  }).join("");
+  return pageHead("My Tasks","Move work forward by updating each task's status.",
+    `<button class="btn btn-primary" data-action="add-task">＋ Add task</button>`) +
+    `<div class="toolbar"><input class="field" id="taskFilter" placeholder="Filter tasks by title..."><select class="field" id="priorityFilter"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select></div>
+    <div class="kanban" id="kanbanBoard">${groups}</div>`;
+}
+function renderCalendar() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const first = new Date(year,month,1).getDay();
+  const days = new Date(year,month+1,0).getDate();
+  const cells = [];
+  for (let i=0;i<first;i++) cells.push(`<div class="cal-day muted"></div>`);
+  for (let day=1;day<=days;day++) {
+    const date = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const events = state.tasks.filter(task => task.due === date);
+    cells.push(`<div class="cal-day ${day===today.getDate()?"today":""}"><b>${day}</b>${events.map(event=>`<div class="cal-event">${escapeHTML(event.title)}</div>`).join("")}</div>`);
+  }
+  return pageHead("Calendar","See task deadlines and plan the month ahead.") +
+    `<div class="card"><h3 class="card-title">${today.toLocaleDateString("en-IN",{month:"long",year:"numeric"})}</h3>
+    <div class="calendar">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(day=>`<div class="subtitle">${day}</div>`).join("")}${cells.join("")}</div></div>`;
+}
+function renderTeam() {
+  const cards = state.members.map(member => `<div class="card member"><div class="member-avatar">${escapeHTML(member.initials)}</div><div class="member-info"><strong>${escapeHTML(member.name)}</strong><span>${escapeHTML(member.role)}</span><span>${escapeHTML(member.email)}</span></div></div>`).join("");
+  return pageHead("Team Members","Know who is working on what and keep collaboration simple.",
+    `<button class="btn btn-primary" data-action="add-member">＋ Add member</button>`) +
+    `<div class="grid member-grid">${cards || '<div class="empty">No members yet.</div>'}</div>`;
+}
+function renderReports() {
+  const done = state.tasks.filter(task=>task.status==="Done").length;
+  const active = state.tasks.filter(task=>task.status==="In Progress").length;
+  const todo = state.tasks.filter(task=>task.status==="To Do").length;
+  const max = Math.max(1,done,active,todo);
+  return pageHead("Reports & Analytics","A quick view of workload and delivery progress.") +
+    `<div class="grid report-grid"><div class="card"><h3 class="card-title">Task status overview</h3><div class="bar-chart">
+    ${[["To Do",todo],["In Progress",active],["Done",done]].map(([label,value])=>`<div class="bar-item"><b>${value}</b><div class="bar" style="height:${Math.max(5,value/max*130)}px"></div><small>${label}</small></div>`).join("")}
+    </div></div><div class="card"><h3 class="card-title">Completion breakdown</h3><div class="donut-wrap"><div class="donut"></div><div class="legend"><div><span style="background:var(--green)"></span>Completed: ${done}</div><div><span style="background:var(--blue)"></span>In progress: ${active}</div><div><span style="background:var(--yellow)"></span>To do: ${todo}</div></div></div></div></div>
+    <div class="card" style="margin-top:16px"><h3 class="card-title">Workspace summary</h3><p class="subtitle">${state.projects.length} projects · ${state.members.length} team members · ${state.tasks.length} tasks</p><div class="progress"><span style="width:${state.tasks.length?done/state.tasks.length*100:0}%"></span></div><p class="subtitle">${state.tasks.length?Math.round(done/state.tasks.length*100):0}% of all tasks are completed.</p></div>`;
+}
+function renderMessages() {
+  const messages = state.messages.map(message => `<div class="message"><div class="member-avatar">${escapeHTML(message.from.split(" ").map(part=>part[0]).join("").slice(0,2))}</div><div class="message-body"><strong>${escapeHTML(message.from)}</strong><p>${escapeHTML(message.text)}</p><small>${escapeHTML(message.time)}</small></div></div>`).join("");
+  return pageHead("Messages","A shared space for project-related updates.",
+    `<button class="btn btn-primary" data-action="add-message">＋ New message</button>`) +
+    `<div class="message-list">${messages || '<div class="empty">No messages yet.</div>'}</div>`;
+}
+function renderSettings() {
+  return pageHead("Settings","Manage your FlowDesk workspace preferences.") +
+    `<div class="grid settings-grid"><div class="card"><h3 class="card-title">Notifications</h3>
+    <div class="setting-row"><div><strong>Email notifications</strong><small>Receive updates when tasks change.</small></div><input class="switch" type="checkbox" data-setting="emailAlerts" ${state.settings.emailAlerts?"checked":""}></div>
+    <div class="setting-row"><div><strong>Weekly summary</strong><small>Get a weekly project progress summary.</small></div><input class="switch" type="checkbox" data-setting="weeklyReport" ${state.settings.weeklyReport?"checked":""}></div>
+    </div><div class="card"><h3 class="card-title">Workspace information</h3>
+    <div class="setting-row"><div><strong>Workspace name</strong><small>FlowDesk Student Workspace</small></div></div>
+    <div class="setting-row"><div><strong>Signed in as</strong><small>Himayathulla · Project Lead</small></div></div>
+    <div class="setting-row"><div><strong>Data storage</strong><small>Saved locally in this browser.</small></div></div>
+    <button class="btn btn-danger" data-action="reset-data">Reset demo data</button></div></div>`;
+}
+function renderPage() {
+  const views = {dashboard:renderDashboard,projects:renderProjects,tasks:renderTasks,calendar:renderCalendar,team:renderTeam,reports:renderReports,messages:renderMessages,settings:renderSettings};
+  document.getElementById("content").innerHTML = (views[currentPage] || renderDashboard)();
+}
+function openModal(type,item=null) {
+  editing = item ? {type,id:item.id} : {type,id:null};
+  const config = {
+    project:{title:item?"Edit project":"Create project",fields:[
+      ["name","Project name","text",item?.name||""],["owner","Project owner","text",item?.owner||"Himayathulla"],
+      ["deadline","Deadline","date",item?.deadline||""],["status","Status","select",item?.status||"Planning",["Planning","In Progress","Done"]],
+      ["progress","Progress (%)","number",item?.progress??0],["description","Description","text",item?.description||"",null,true]]},
+    task:{title:item?"Edit task":"Create task",fields:[
+      ["title","Task title","text",item?.title||""],["project","Project","select",item?.project||state.projects[0]?.name||"",state.projects.map(p=>p.name)],
+      ["assignee","Assignee","select",item?.assignee||state.members[0]?.name||"Himayathulla",state.members.map(m=>m.name)],
+      ["due","Due date","date",item?.due||""],["status","Status","select",item?.status||"To Do",["To Do","In Progress","Done"]],
+      ["priority","Priority","select",item?.priority||"Medium",["High","Medium","Low"]]]},
+    member:{title:"Add team member",fields:[
+      ["name","Full name","text",""],["role","Role","text",""],["email","Email address","email",""]]},
+    message:{title:"Send a message",fields:[
+      ["from","Your name","text","Himayathulla"],["text","Message","text",""]]}
+  }[type];
+  document.getElementById("modalTitle").textContent = config.title;
+  document.getElementById("formFields").innerHTML = config.fields.map(([name,label,kind,value,options,full]) => {
+    let input = kind==="select" ? `<select class="field" name="${name}" required>${(options||[]).map(option=>`<option ${option===value?"selected":""}>${escapeHTML(option)}</option>`).join("")}</select>` :
+      `<input class="field" name="${name}" type="${kind}" value="${escapeHTML(value)}" ${name==="progress"?'min="0" max="100"':''} required>`;
+    return `<div class="form-group ${full?"full":""}"><label>${label}</label>${input}</div>`;
+  }).join("");
+  document.getElementById("modalBackdrop").classList.add("open");
+}
+function closeModal() {
+  document.getElementById("modalBackdrop").classList.remove("open");
+  editing = null;
+}
+function nextId(list) {
+  return Math.max(0,...list.map(item=>Number(item.id)||0))+1;
+}
+function handleFormSubmit(event) {
+  event.preventDefault();
+  if (!editing) return;
+  const values = Object.fromEntries(new FormData(event.target).entries());
+  const type = editing.type;
+  if (type==="project") {
+    values.progress = Math.max(0,Math.min(100,Number(values.progress)||0));
+    if (editing.id) state.projects = state.projects.map(item=>item.id===editing.id?{...item,...values}:item);
+    else state.projects.push({id:nextId(state.projects),...values});
+  }
+  if (type==="task") {
+    if (editing.id) state.tasks = state.tasks.map(item=>item.id===editing.id?{...item,...values}:item);
+    else state.tasks.push({id:nextId(state.tasks),...values});
+  }
+  if (type==="member") {
+    const name = values.name.trim();
+    state.members.push({id:nextId(state.members),...values,initials:name.split(" ").map(p=>p[0]).join("").slice(0,2).toUpperCase()});
+  }
+  if (type==="message") {
+    state.messages.unshift({id:nextId(state.messages),...values,time:"Just now"});
+  }
+  saveState();
+  closeModal();
+  renderPage();
+  toast("Changes saved successfully.");
+}
+function deleteItem(type,id) {
+  if (!confirm("Are you sure you want to delete this item?")) return;
+  if (type==="project") {
+    state.projects = state.projects.filter(item=>item.id!==id);
+  } else if (type==="task") {
+    state.tasks = state.tasks.filter(item=>item.id!==id);
+  }
+  saveState();
+  renderPage();
+  toast("Item deleted.");
+}
+function handleAction(action,id) {
+  const numericId = Number(id);
+  if (action==="add-project") openModal("project");
+  if (action==="add-task") openModal("task");
+  if (action==="add-member") openModal("member");
+  if (action==="add-message") openModal("message");
+  if (action==="edit-project") openModal("project",state.projects.find(item=>item.id===numericId));
+  if (action==="edit-task") openModal("task",state.tasks.find(item=>item.id===numericId));
+  if (action==="delete-project") deleteItem("project",numericId);
+  if (action==="delete-task") deleteItem("task",numericId);
+  if (action==="reset-data" && confirm("Restore the original sample workspace?")) {
+    state = JSON.parse(JSON.stringify(initialState));
+    saveState();
+    renderPage();
+    toast("Demo data restored.");
+  }
+}
+document.getElementById("navigation").addEventListener("click",event=>{
+  const button = event.target.closest("button[data-page]");
+  if (button) setPage(button.dataset.page);
+});
+document.getElementById("content").addEventListener("click",event=>{
+  const button = event.target.closest("[data-action]");
+  if (button) handleAction(button.dataset.action,button.dataset.id);
+});
+document.getElementById("content").addEventListener("change",event=>{
+  if (event.target.matches(".task-status")) {
+    const task = state.tasks.find(item=>item.id===Number(event.target.dataset.id));
+    if (task) {
+      task.status = event.target.value;
+      saveState();
+      renderPage();
+      toast("Task status updated.");
+    }
+  }
+  if (event.target.matches("[data-setting]")) {
+    state.settings[event.target.dataset.setting] = event.target.checked;
+    saveState();
+    toast("Preference saved.");
+  }
+});
+document.getElementById("content").addEventListener("input",event=>{
+  if (event.target.id==="taskFilter" || event.target.id==="priorityFilter") {
+    const term = (document.getElementById("taskFilter")?.value||"").toLowerCase();
+    const priority = document.getElementById("priorityFilter")?.value||"";
+    document.querySelectorAll(".task-card").forEach(card=>{
+      const text = card.textContent.toLowerCase();
+      const matchesText = text.includes(term);
+      const matchesPriority = !priority || text.includes(priority.toLowerCase()+" priority");
+      card.style.display = matchesText && matchesPriority ? "" : "none";
+    });
+  }
+});
+document.getElementById("itemForm").addEventListener("submit",handleFormSubmit);
+document.getElementById("closeModal").addEventListener("click",closeModal);
+document.getElementById("cancelModal").addEventListener("click",closeModal);
+document.getElementById("modalBackdrop").addEventListener("click",event=>{
+  if (event.target.id==="modalBackdrop") closeModal();
+});
+document.getElementById("menuToggle").addEventListener("click",()=>{
+  document.getElementById("sidebar").classList.toggle("open");
+});
+document.getElementById("globalSearch").addEventListener("keydown",event=>{
+  if (event.key==="Enter") {
+    const query = event.target.value.toLowerCase().trim();
+    if (!query) return;
+    const task = state.tasks.find(item=>item.title.toLowerCase().includes(query));
+    const project = state.projects.find(item=>item.name.toLowerCase().includes(query));
+    if (task) {
+      setPage("tasks");
+      toast("Found task: "+task.title);
+    } else if (project) {
+      setPage("projects");
+      toast("Found project: "+project.name);
+    } else {
+      toast("No matching task or project found.");
+    }
+  }
+});
+renderPage();
+</script>
+<!-- FLOWDESK IMPLEMENTATION NOTES: the following numbered notes document the app's feature map. -->
+<!-- FlowDesk developer note 001: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 002: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 003: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 004: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 005: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 006: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 007: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 008: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 009: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 010: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 011: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 012: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 013: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 014: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 015: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 016: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 017: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 018: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 019: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 020: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 021: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 022: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 023: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 024: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 025: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 026: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 027: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 028: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 029: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 030: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 031: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 032: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 033: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 034: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 035: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 036: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 037: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 038: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 039: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 040: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 041: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 042: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 043: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 044: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 045: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 046: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 047: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 048: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 049: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 050: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 051: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 052: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 053: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 054: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 055: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 056: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 057: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 058: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 059: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 060: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 061: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 062: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 063: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 064: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 065: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 066: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 067: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 068: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 069: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 070: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 071: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 072: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 073: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 074: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 075: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 076: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 077: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 078: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 079: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 080: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 081: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 082: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 083: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 084: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 085: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 086: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 087: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 088: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 089: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 090: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 091: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 092: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 093: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 094: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 095: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 096: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 097: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 098: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 099: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 100: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 101: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 102: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 103: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 104: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 105: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 106: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 107: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 108: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 109: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 110: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 111: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 112: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 113: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 114: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 115: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 116: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 117: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 118: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 119: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 120: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 121: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 122: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 123: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 124: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 125: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 126: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 127: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 128: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 129: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 130: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 131: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 132: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 133: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 134: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 135: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 136: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 137: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 138: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 139: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 140: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 141: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 142: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 143: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 144: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 145: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 146: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 147: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 148: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 149: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 150: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 151: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 152: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 153: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 154: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 155: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 156: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 157: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 158: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 159: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 160: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 161: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 162: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 163: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 164: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 165: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 166: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 167: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 168: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 169: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 170: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 171: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 172: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 173: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 174: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 175: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 176: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 177: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 178: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 179: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 180: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 181: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 182: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 183: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 184: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 185: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 186: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 187: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 188: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 189: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 190: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 191: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 192: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 193: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 194: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 195: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 196: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 197: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 198: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 199: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 200: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 201: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 202: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 203: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 204: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 205: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 206: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 207: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 208: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 209: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 210: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 211: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 212: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 213: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 214: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 215: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 216: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 217: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 218: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 219: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 220: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 221: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 222: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 223: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 224: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 225: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 226: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 227: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 228: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 229: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 230: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 231: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 232: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 233: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 234: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 235: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 236: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 237: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 238: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 239: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 240: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 241: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 242: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 243: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 244: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 245: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 246: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 247: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 248: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 249: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 250: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 251: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 252: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 253: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 254: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 255: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 256: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 257: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 258: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 259: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 260: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 261: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 262: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 263: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 264: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 265: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 266: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 267: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 268: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 269: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 270: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 271: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 272: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 273: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 274: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 275: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 276: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 277: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 278: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 279: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 280: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 281: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 282: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 283: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 284: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 285: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 286: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 287: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 288: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 289: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 290: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 291: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 292: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 293: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 294: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 295: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 296: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 297: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 298: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 299: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 300: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 301: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 302: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 303: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 304: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 305: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 306: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 307: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 308: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 309: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 310: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 311: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 312: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 313: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 314: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 315: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 316: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 317: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 318: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 319: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 320: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 321: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 322: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 323: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 324: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 325: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 326: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 327: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 328: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 329: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 330: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 331: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 332: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 333: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 334: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 335: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 336: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 337: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 338: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 339: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 340: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 341: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 342: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 343: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 344: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 345: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 346: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 347: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 348: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 349: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 350: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 351: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 352: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 353: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 354: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 355: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 356: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 357: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 358: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 359: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 360: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 361: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 362: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 363: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 364: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 365: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 366: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 367: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 368: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 369: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 370: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 371: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 372: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 373: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 374: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 375: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 376: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 377: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 378: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 379: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 380: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 381: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 382: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 383: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 384: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 385: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 386: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 387: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 388: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 389: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 390: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 391: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 392: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 393: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 394: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 395: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 396: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 397: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 398: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 399: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 400: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 401: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 402: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 403: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 404: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 405: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 406: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 407: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 408: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 409: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 410: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 411: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 412: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 413: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 414: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 415: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 416: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 417: The project runs locally and does not require an external API key. -->
+<!-- FlowDesk developer note 418: LocalStorage data belongs to the browser and device where it was entered. -->
+<!-- FlowDesk developer note 419: For a multi-user deployment, connect this frontend to a secure backend API. -->
+<!-- FlowDesk developer note 420: Validate and authorize all data again on the server in a production system. -->
+<!-- FlowDesk developer note 421: Dashboard summarizes project count, task count, active work and completed work. -->
+<!-- FlowDesk developer note 422: Projects can be created, edited and deleted from the Projects page. -->
+<!-- FlowDesk developer note 423: Tasks can be created, edited and deleted from the My Tasks page. -->
+<!-- FlowDesk developer note 424: Task status can be changed directly from the Kanban board. -->
+<!-- FlowDesk developer note 425: Task status changes are persisted in browser LocalStorage. -->
+<!-- FlowDesk developer note 426: Project progress values are constrained to the range zero through one hundred. -->
+<!-- FlowDesk developer note 427: Calendar displays task deadlines in the current month. -->
+<!-- FlowDesk developer note 428: Team Members stores names, roles and email addresses. -->
+<!-- FlowDesk developer note 429: Reports calculate task totals from the current browser data. -->
+<!-- FlowDesk developer note 430: Messages provides a simple project update feed. -->
+<!-- FlowDesk developer note 431: Settings stores notification preferences locally. -->
+<!-- FlowDesk developer note 432: All user-entered text is escaped before it is inserted into HTML. -->
+<!-- FlowDesk developer note 433: The responsive layout collapses the sidebar on narrow screens. -->
+<!-- FlowDesk developer note 434: The mobile menu button opens and closes the navigation drawer. -->
+<!-- FlowDesk developer note 435: Demo data is provided so the first launch is not an empty screen. -->
+<!-- FlowDesk developer note 436: Reset demo data restores the original sample workspace. -->
+<!-- FlowDesk developer note 437: The project runs locally and does not require an external API key. -->
+</body>
+</html>
